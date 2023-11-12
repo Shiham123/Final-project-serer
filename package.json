@@ -4,6 +4,7 @@
   "description": "this is practice project",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon indexTwo.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "shiham",
