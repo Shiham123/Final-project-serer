@@ -53,7 +53,9 @@ app.get('/reviews', async (request, response) => {
 
 app.get('/carts', async (request, response) => {
   try {
-    const cursor = await cartCollection.find().toArray();
+    const email = request.query.email;
+    const query = { loggedInUser: email };
+    const cursor = await cartCollection.find(query).toArray();
     response.status(200).send(cursor);
   } catch (error) {
     response.status(402).send({ error: 'cart form server error' });
