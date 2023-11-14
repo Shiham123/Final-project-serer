@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const { ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
@@ -55,7 +56,8 @@ app.get('/carts', async (request, response) => {
   try {
     const email = request.query.email;
     const query = { loggedInUser: email };
-    const cursor = await cartCollection.find(query).toArray();
+    const options = { sort: { price: 1 } };
+    const cursor = await cartCollection.find(query, options).toArray();
     response.status(200).send(cursor);
   } catch (error) {
     response.status(402).send({ error: 'cart form server error' });
@@ -70,6 +72,17 @@ app.post('/carts', async (request, response) => {
   } catch (error) {
     console.log('add to cart error', error);
     response.status(404).send({ error: 'add to cart section error' });
+  }
+});
+
+app.delete('/carts/:id', async (request, response) => {
+  try {
+    const id = request.params.id;
+    const query = { _id: new ObjectId(id) };
+    const result = await cartCollection.deleteOne(query);
+    response.status(200).send(result);
+  } catch (error) {
+    response.status(401).send({ error: 'data not able to delete' });
   }
 });
 
