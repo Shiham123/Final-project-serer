@@ -14,6 +14,7 @@ const uri = 'mongodb://localhost:27017';
 
 let menuCollection;
 let testimonialCollection;
+let cartCollection;
 
 const connectDB = async () => {
   try {
@@ -21,6 +22,7 @@ const connectDB = async () => {
     const bistroDatabase = mongoose.connection.useDb('bistroDB');
     menuCollection = bistroDatabase.collection('menuItem');
     testimonialCollection = bistroDatabase.collection('testimonial');
+    cartCollection = bistroDatabase.collection('cartItem');
     console.log('MongoDB is connected');
   } catch (error) {
     console.error('MongoDB connection error:', error);
@@ -46,6 +48,18 @@ app.get('/reviews', async (request, response) => {
   } catch (error) {
     console.error('Error fetching testimonials:', error);
     response.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/carts', async (request, response) => {
+  try {
+    const cartItem = request.body;
+    console.log(cartItem);
+    const result = await cartCollection.insertOne(cartItem);
+    response.status(200).send(result);
+  } catch (error) {
+    console.log('add to cart error', error);
+    response.status(404).send({ error: 'add to cart section error' });
   }
 });
 
