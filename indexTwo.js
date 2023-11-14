@@ -51,10 +51,18 @@ app.get('/reviews', async (request, response) => {
   }
 });
 
+app.get('/carts', async (request, response) => {
+  try {
+    const cursor = await cartCollection.find().toArray();
+    response.status(200).send(cursor);
+  } catch (error) {
+    response.status(402).send({ error: 'cart form server error' });
+  }
+});
+
 app.post('/carts', async (request, response) => {
   try {
     const cartItem = request.body;
-    console.log(cartItem);
     const result = await cartCollection.insertOne(cartItem);
     response.status(200).send(result);
   } catch (error) {
