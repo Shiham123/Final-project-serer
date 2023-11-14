@@ -10,6 +10,7 @@ app.use(express.json());
 
 const port = 5000;
 const uri = 'mongodb://localhost:27017';
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster-one.varjcyv.mongodb.net/?retryWrites=true&w=majority`;
 
 let menuCollection;
 let testimonialCollection;
@@ -17,11 +18,9 @@ let testimonialCollection;
 const connectDB = async () => {
   try {
     await mongoose.connect(uri);
-
     const bistroDatabase = mongoose.connection.useDb('bistroDB');
     menuCollection = bistroDatabase.collection('menuItem');
     testimonialCollection = bistroDatabase.collection('testimonial');
-
     console.log('MongoDB is connected');
   } catch (error) {
     console.error('MongoDB connection error:', error);
