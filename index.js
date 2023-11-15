@@ -4,15 +4,21 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
+/**
+ * ! middle were
+ *  ? here
+ */
+
 app.use(cors());
 app.use(express.json());
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 
+/**
+ * ! uri here
+ */
 const uri = 'mongodb://localhost:27017';
-
-// const uri =
-//   'mongodb+srv://<username>:<password>@cluster-one.varjcyv.mongodb.net/?retryWrites=true&w=majority';
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster-one.varjcyv.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -30,6 +36,10 @@ const run = async () => {
     const testimonialCollection = bistroDatabase.collection('testimonial');
     const cartCollection = bistroDatabase.collection('cartItem');
     const userCollection = bistroDatabase.collection('userCl');
+
+    /**
+     * ! get method here
+     */
 
     app.get('/menu', async (request, response) => {
       const cursor = menuCollection.find();
@@ -51,6 +61,10 @@ const run = async () => {
       response.send(cursor);
     });
 
+    /**
+     * ! post method here
+     */
+
     app.post('/carts', async (request, response) => {
       const cartItem = request.body;
       const result = await cartCollection.insertOne(cartItem);
@@ -59,8 +73,22 @@ const run = async () => {
 
     app.post('/users', async (request, response) => {
       const user = request.body;
-      console.log(user);
+      const query = { email: user.email };
+      const existingUser = await userCollection.findOne(query);
+
+      if (existingUser) {
+        return response
+          .status(404)
+          .send({ message: 'user exits ', insertedId: null });
+      }
+
+      const result = await userCollection.insertOne(user);
+      response.status(200).send(result);
     });
+
+    /**
+     * ! delete method here
+     */
 
     app.delete('/carts/:id', async (request, response) => {
       const id = request.params.id;
@@ -76,6 +104,10 @@ const run = async () => {
   }
 };
 run();
+
+/**
+ * ! default setting
+ */
 
 app.get('/', async (request, response) => {
   response.send('successfully connected');
