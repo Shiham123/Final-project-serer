@@ -16,14 +16,18 @@ const uri = 'mongodb://localhost:27017';
 let menuCollection;
 let testimonialCollection;
 let cartCollection;
+let userCollection;
 
 const connectDB = async () => {
   try {
     await mongoose.connect(uri);
     const bistroDatabase = mongoose.connection.useDb('bistroDB');
+
     menuCollection = bistroDatabase.collection('menuItem');
     testimonialCollection = bistroDatabase.collection('testimonial');
     cartCollection = bistroDatabase.collection('cartItem');
+    userCollection = bistroDatabase.collection('userCl');
+
     console.log('MongoDB is connected');
   } catch (error) {
     console.error('MongoDB connection error:', error);
@@ -72,6 +76,18 @@ app.post('/carts', async (request, response) => {
   } catch (error) {
     console.log('add to cart error', error);
     response.status(404).send({ error: 'add to cart section error' });
+  }
+});
+
+app.post('/users', async (request, response) => {
+  try {
+    const user = request.body;
+    console.log(user);
+    const result = await userCollection.insertOne(user);
+    response.status(200).send(result);
+  } catch (error) {
+    console.log('user error', error);
+    response.status(404).send({ error: 'user not found' });
   }
 });
 
