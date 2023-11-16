@@ -102,6 +102,25 @@ const run = async () => {
       response.status(200).send(result);
     });
 
+    app.get('/users/admin/:email', verifyToken, async (request, response) => {
+      const email = request.params.email;
+      const emailFromClient = request.authorizationUser.email;
+
+      if (email !== emailFromClient) {
+        return response.status(405).send({ message: 'unauthorized access' });
+      }
+
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let isAdmin = false;
+
+      if (user) {
+        isAdmin = user?.role === 'admin';
+      }
+
+      response.send({ isAdmin });
+    });
+
     /**
      * ! post method here
      */
