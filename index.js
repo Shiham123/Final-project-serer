@@ -2,11 +2,12 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 /**
- * ! middle were
- *  ? here
+ * ! middleWere here
+ *
  */
 
 app.use(cors());
@@ -38,6 +39,41 @@ const run = async () => {
     const userCollection = bistroDatabase.collection('userCl');
 
     /**
+     * ! jwt related api
+     * ?
+     */
+
+    app.post('/jwt', async (request, response) => {
+      const user = request.body;
+
+      const token = jwt.sign(user, process.env.DB_SECRETE_KEY, {
+        expiresIn: '365d',
+      });
+
+      response.status(200).send(token);
+    });
+
+    /**
+     * ! custom middleware
+     */
+
+    const verifyToken = (request, response, next) => {
+      const authorizationHeaders = request.headers.authorization;
+      if (!authorizationHeaders) {
+        response.status(401).send({ message: 'authorization forbidden' });
+      }
+
+      const token = authorizationHeaders.split(' ')[1];
+      jwt.verify(token, process.env.DB_SECRETE_KEY, (error, decoded) => {
+        if (error) {
+          return response.status(402).send({ message: 'not verified' });
+        }
+        request.authorizationUser = decoded;
+        next();
+      });
+    };
+
+    /**
      * ! get method here
      */
 
@@ -61,7 +97,7 @@ const run = async () => {
       response.send(cursor);
     });
 
-    app.get('/users', async (request, response) => {
+    app.get('/users', verifyToken, async (request, response) => {
       const result = await userCollection.find().toArray();
       response.status(200).send(result);
     });
