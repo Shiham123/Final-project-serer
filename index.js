@@ -61,6 +61,11 @@ const run = async () => {
       response.send(cursor);
     });
 
+    app.get('/users', async (request, response) => {
+      const result = await userCollection.find().toArray();
+      response.status(200).send(result);
+    });
+
     /**
      * ! post method here
      */
@@ -74,8 +79,8 @@ const run = async () => {
     app.post('/users', async (request, response) => {
       const user = request.body;
       const query = { email: user.email };
-      const existingUser = await userCollection.findOne(query);
 
+      const existingUser = await userCollection.findOne(query);
       if (existingUser) {
         return response
           .status(404)
