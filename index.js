@@ -63,7 +63,7 @@ const run = async () => {
         response.status(401).send({ message: 'authorization forbidden' });
       }
 
-      const token = authorizationHeaders.split(' ')[1];
+      const token = request.headers.authorization.split(' ')[1];
       jwt.verify(token, process.env.DB_SECRETE_KEY, (error, decoded) => {
         if (error) {
           return response.status(402).send({ message: 'not verified' });
@@ -162,17 +162,22 @@ const run = async () => {
      * ! patch method
      */
 
-    app.patch('/users/admin/:id', async (request, response) => {
-      const id = request.params.id;
-      const query = { _id: new ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          role: 'admin',
-        },
-      };
-      const result = await userCollection.updateOne(query, updatedDoc);
-      response.status(200).send(result);
-    });
+    app.patch(
+      '/users/admin/:id',
+      verifyToken,
+      verifyAdmin,
+      async (request, response) => {
+        const id = request.params.id;
+        const query = { _id: new ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            role: 'admin',
+          },
+        };
+        const result = await userCollection.updateOne(query, updatedDoc);
+        response.status(200).send(result);
+      }
+    );
 
     /**
      * ! delete method here
@@ -185,12 +190,17 @@ const run = async () => {
       response.send(result);
     });
 
-    app.delete('/users/:id', async (request, response) => {
-      const id = request.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await userCollection.deleteOne(query);
-      response.status(201).send(result);
-    });
+    app.delete(
+      '/users/:id',
+      verifyToken,
+      verifyAdmin,
+      async (request, response) => {
+        const id = request.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await userCollection.deleteOne(query);
+        response.status(201).send(result);
+      }
+    );
 
     await client.db('admin').command({ ping: 1 });
     console.log('You successfully connected to MongoDB!');
