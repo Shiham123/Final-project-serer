@@ -73,6 +73,18 @@ const run = async () => {
       });
     };
 
+    const verifyAdmin = async (request, response, next) => {
+      const email = request.authorizationUser.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const isAdmin = user?.role === 'admin';
+
+      if (!isAdmin)
+        return response.status(403).send({ message: 'not an admin access' });
+
+      next();
+    };
+
     /**
      * ! get method here
      */
@@ -97,7 +109,7 @@ const run = async () => {
       response.send(cursor);
     });
 
-    app.get('/users', verifyToken, async (request, response) => {
+    app.get('/users', verifyToken, verifyAdmin, async (request, response) => {
       const result = await userCollection.find().toArray();
       response.status(200).send(result);
     });
