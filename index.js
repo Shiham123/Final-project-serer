@@ -102,6 +102,13 @@ const run = async () => {
       response.send(result);
     });
 
+    app.delete('/users/:id', async (request, response) => {
+      const id = request.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
+      response.status(201).send(result);
+    });
+
     await client.db('admin').command({ ping: 1 });
     console.log('You successfully connected to MongoDB!');
   } catch (error) {
