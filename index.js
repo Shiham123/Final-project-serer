@@ -92,6 +92,22 @@ const run = async () => {
     });
 
     /**
+     * ! patch method
+     */
+
+    app.patch('/users/admin/:id', async (request, response) => {
+      const id = request.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: 'admin',
+        },
+      };
+      const result = await userCollection.updateOne(query, updatedDoc);
+      response.status(200).send(result);
+    });
+
+    /**
      * ! delete method here
      */
 
