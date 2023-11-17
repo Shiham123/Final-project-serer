@@ -208,6 +208,22 @@ const run = async () => {
       }
     );
 
+    app.delete(
+      '/menu/:id',
+      verifyToken,
+      verifyAdmin,
+      async (request, response) => {
+        const id = request.params.id;
+        const query = { _id: new ObjectId(id) };
+
+        const result = await menuCollection.deleteOne(query);
+        response.status(202).send(result);
+      }
+    );
+
+    /**
+     * ? here i am showing the database connection message
+     */
     await client.db('admin').command({ ping: 1 });
     console.log('You successfully connected to MongoDB!');
   } catch (error) {
