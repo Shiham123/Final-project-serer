@@ -95,6 +95,13 @@ const run = async () => {
       response.status(200).send(result);
     });
 
+    app.get('/menu/:id', async (request, response) => {
+      const id = request.params.id;
+      const query = { _id: id };
+      const result = await menuCollection.findOne(query);
+      response.send(result);
+    });
+
     app.get('/reviews', async (request, response) => {
       const cursor = testimonialCollection.find();
       const result = await cursor.toArray();
