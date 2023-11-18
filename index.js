@@ -192,6 +192,24 @@ const run = async () => {
       }
     );
 
+    app.patch('/menu/:id', async (request, response) => {
+      const id = request.params.id;
+      const items = request.body;
+
+      const filter = { _id: id };
+      const updatedDoc = {
+        $set: {
+          name: items.name,
+          price: items.price,
+          recipe: items.recipe,
+          category: items.category,
+          image: items.image,
+        },
+      };
+      const result = await menuCollection.updateOne(filter, updatedDoc);
+      response.send(result);
+    });
+
     /**
      * ! delete method here
      */
