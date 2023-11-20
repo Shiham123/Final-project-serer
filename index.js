@@ -263,20 +263,29 @@ const run = async () => {
       response.send({ clientSecret: paymentIntent.client_secret });
     });
 
+    // ! get here
+
+    app.get('/payments/:email', verifyToken, async (request, response) => {
+      const query = { email: request.params.email };
+      if (request.params.email !== request.authorizationUser.email) {
+        return response.status(404).send({ message: 'user not valid' });
+      }
+      const result = await paymentCollection.find(query).toArray();
+      response.send(result);
+    });
+
     // post here
 
     app.post('/payments', async (request, response) => {
       const payment = request.body;
       const paymentResult = await paymentCollection.insertOne(payment);
 
-      console.log('payment info', payment);
       const query = {
         _id: {
           $in: payment.cartIds.map((id) => new ObjectId(id)),
         },
       };
       const deleteResult = await cartCollection.deleteMany(query);
-      console.log('--------------', paymentResult, deleteResult);
       response.send({ paymentResult, deleteResult });
     });
 
