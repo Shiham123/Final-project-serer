@@ -4,6 +4,7 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const stripe = require('stripe')(process.env.SECRETE_STRIPE_KEY);
 
 /**
  * ! middleWere here
@@ -245,6 +246,21 @@ const run = async () => {
         response.status(202).send(result);
       }
     );
+
+    /**
+     * ! payment method here
+     */
+
+    app.post('/create-payment-intent', async (request, response) => {
+      const { price } = request.body;
+      const amount = parseInt(price * 100);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card'],
+      });
+      response.send({ clientSecret: paymentIntent.client_secret });
+    });
 
     /**
      * ? here i am showing the database connection message
