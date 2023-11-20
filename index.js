@@ -38,6 +38,7 @@ const run = async () => {
     const testimonialCollection = bistroDatabase.collection('testimonial');
     const cartCollection = bistroDatabase.collection('cartItem');
     const userCollection = bistroDatabase.collection('userCl');
+    const paymentCollection = bistroDatabase.collection('payment');
 
     /**
      * ! jwt related api
@@ -260,6 +261,23 @@ const run = async () => {
         payment_method_types: ['card'],
       });
       response.send({ clientSecret: paymentIntent.client_secret });
+    });
+
+    // post here
+
+    app.post('/payments', async (request, response) => {
+      const payment = request.body;
+      const paymentResult = await paymentCollection.insertOne(payment);
+
+      console.log('payment info', payment);
+      const query = {
+        _id: {
+          $in: payment.cartIds.map((id) => new ObjectId(id)),
+        },
+      };
+      const deleteResult = await cartCollection.deleteMany(query);
+      console.log('--------------', paymentResult, deleteResult);
+      response.send({ paymentResult, deleteResult });
     });
 
     /**
