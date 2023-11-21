@@ -290,8 +290,34 @@ const run = async () => {
     });
 
     /**
+     * ! admin stats here
+     */
+
+    app.get(
+      '/admin-stats',
+      verifyToken,
+      verifyAdmin,
+      async (request, response) => {
+        const users = await userCollection.estimatedDocumentCount();
+        const menuItems = await menuCollection.estimatedDocumentCount();
+        const orders = await paymentCollection.estimatedDocumentCount();
+
+        const result = await paymentCollection
+          .aggregate([
+            { $group: { _id: null, totalRevenue: { $sum: '$price' } } },
+          ])
+          .toArray();
+        console.log(result);
+        const revenue = result.length > 0 ? result[0].totalRevenue : 0;
+
+        response.send({ users, menuItems, orders, revenue });
+      }
+    );
+
+    /**
      * ? here i am showing the database connection message
      */
+
     await client.db('admin').command({ ping: 1 });
     console.log('You successfully connected to MongoDB!');
   } catch (error) {
