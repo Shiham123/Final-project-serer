@@ -307,12 +307,36 @@ const run = async () => {
             { $group: { _id: null, totalRevenue: { $sum: '$price' } } },
           ])
           .toArray();
-        console.log(result);
         const revenue = result.length > 0 ? result[0].totalRevenue : 0;
 
         response.send({ users, menuItems, orders, revenue });
       }
     );
+
+    app.get('/order-stats', async (request, response) => {
+      const result = await paymentCollection
+        .aggregate([
+          { $unwind: '$menuItemIds' },
+          {
+            $lookup: {
+              from: 'menuItem',
+              localField: 'menuItemIds',
+              foreignField: '_id',
+              as: 'menuItems',
+            },
+          },
+          { $unwind: '$menuItems' },
+          {
+            $group: {
+              _id: '$menuItems.category',
+              quantity: { $sum: 1 },
+              totalRevenue: { $sum: '$menuItems.price' },
+            },
+          },
+        ])
+        .toArray();
+      response.send(result);
+    });
 
     /**
      * ? here i am showing the database connection message
