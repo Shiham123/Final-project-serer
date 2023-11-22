@@ -313,37 +313,50 @@ const run = async () => {
       }
     );
 
-    app.get('/order-stats', async (request, response) => {
-      const result = await paymentCollection
-        .aggregate([
-          { $unwind: '$menuItemIds' },
-          {
-            $lookup: {
-              from: 'menuItem',
-              localField: 'menuItemIds',
-              foreignField: '_id',
-              as: 'menuItems',
+    app.get(
+      '/order-stats',
+      verifyToken,
+      verifyAdmin,
+      async (request, response) => {
+        const result = await paymentCollection
+          .aggregate([
+            { $unwind: '$menuItemIds' },
+            {
+              $lookup: {
+                from: 'menuItem',
+                localField: 'menuItemIds',
+                foreignField: '_id',
+                as: 'menuItems',
+              },
             },
-          },
-          { $unwind: '$menuItems' },
-          {
-            $group: {
-              _id: '$menuItems.category',
-              quantity: { $sum: 1 },
-              totalRevenue: { $sum: '$menuItems.price' },
+            { $unwind: '$menuItems' },
+            {
+              $group: {
+                _id: '$menuItems.category',
+                quantity: { $sum: 1 },
+                totalRevenue: { $sum: '$menuItems.price' },
+              },
             },
-          },
-        ])
-        .toArray();
-      response.send(result);
-    });
+            {
+              $project: {
+                _id: 0,
+                category: '$_id',
+                quantity: '$quantity',
+                totalRevenue: '$totalRevenue',
+              },
+            },
+          ])
+          .toArray();
+        response.send(result);
+      }
+    );
 
     /**
      * ? here i am showing the database connection message
      */
 
-    await client.db('admin').command({ ping: 1 });
-    console.log('You successfully connected to MongoDB!');
+    // await client.db('admin').command({ ping: 1 });
+    // console.log('You successfully connected to MongoDB!');
   } catch (error) {
     console.dir(error);
   }
